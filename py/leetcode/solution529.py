@@ -2,89 +2,72 @@ from typing import List
 
 
 class Solution:
-    def updateBoard(self, board: List[List[str]], click: List[int]) -> List[List[str]]:
+    def __init__(self):
+        self.m1 = {}
+
+    def canPartitionKSubsets(self, nums: List[int], k: int) -> bool:
         """
 
-        :param board:
-        :param click:
+        :param nums:
+        :param k:
         :return:
         """
-        if board[click[0]][click[1]] == 'M':
-            board[click[0]][click[1]] = 'X'
-            return board
-        checkN = self.checkNumber(board, click[1], click[0])
-        if checkN != 0:
-            board[click[0]][click[1]] = str(checkN)
-            return board
+        sum1 = sum(nums)
+        if sum1 % k != 0:
+            return False
+        tar = sum1 // k
+        todec = 0
+        n2 = []
+        for i in nums:
+            if i == tar:
+                todec +=  1
+                continue
+            if i > tar:
+                return False
+            n2.append(i)
+        k -= todec
+        ll = k * [tar]
+        n2.sort()
+        res = self.checkOK(n2, ll)
+        return res
 
-        ll = []
-        ll.append((click[0], click[1]))
-        w, h = len(board[0]), len(board)
-        used = set()
-        while len(ll) > 0:
-            y, x = ll.pop(0)
-            if (y,x) in used:
-                continue
-            used.add((y,x))
-            res = self.checkNumber(board, x, y)
-            if res != 0:
-                board[y][x] = str(res)
-                continue
+    def checkOK(self, numlist, klist):
+        t1,t2 = tuple(numlist), tuple(klist)
+        if (t1,t2) in self.m1:
+            return self.m1[(t1,t2)]
+
+        if len(numlist) == 1:
+            if len(klist) != 1:
+                self.m1[(t1, t2)] = False
+                return False
+            if klist[0] == numlist[0]:
+                self.m1[(t1, t2)] = True
+                return True
             else:
-                board[y][x] = 'B'
-                if y - 1 >= 0:
-                    if x - 1 >= 0:
-                        if board[y - 1][x - 1] == 'E':
-                            ll.append((y - 1, x - 1))
-                    if board[y - 1][x] == 'E':
-                        ll.append((y - 1, x))
-                    if x + 1 <= w - 1:
-                        if board[y - 1][x + 1] == 'E':
-                            ll.append((y - 1, x + 1))
-                if x - 1 >= 0:
-                    if board[y][x - 1] == 'E':
-                        ll.append((y, x - 1))
-                if x + 1 <= w - 1:
-                    if board[y][x + 1] == 'E':
-                        ll.append((y, x + 1))
-                if y + 1 <= h - 1:
-                    if x - 1 >= 0:
-                        if board[y + 1][x - 1] == 'E':
-                            ll.append((y + 1, x - 1))
-                    if board[y + 1][x] == 'E':
-                        ll.append((y + 1, x))
-                    if x + 1 <= w - 1:
-                        if board[y + 1][x + 1] == 'E':
-                            ll.append((y + 1, x + 1))
+                self.m1[(t1, t2)] = False
+                return False
+        ok = False
+        for i in numlist:
+            for (k,v) in enumerate(klist):
+                if v >= i:
+                    restV = v -i
+                    if restV == 0:
+                        res1 = self.checkOK(numlist[1:],  klist[:k]+klist[k+1:] )
+                        if res1:
+                            self.m1[(t1, t2)] = True
+                            return True
+                    else:
+                        res1 = self.checkOK(numlist[1:],  klist[:k]+ [restV]+ klist[k+1:] )
+                        if res1:
+                            self.m1[(t1, t2)] = True
 
-        return board
+                            return True
+        self.m1[(t1, t2)] = False
+        return False
 
-    def checkNumber(self, board, x, y):
-        w = len(board[0])
-        h = len(board)
-        cnt = 0
-        if y - 1 >= 0:
-            if board[y - 1][x] == 'M':
-                cnt += 1
-            if x - 1 >= 0:
-                if board[y - 1][x - 1] == 'M':
-                    cnt += 1
-            if x + 1 <= w - 1:
-                if board[y - 1][x + 1] == 'M':
-                    cnt += 1
-        if x - 1 >= 0:
-            if board[y][x - 1] == 'M':
-                cnt += 1
-        if x + 1 <= w - 1:
-            if board[y][x + 1] == 'M':
-                cnt += 1
-        if y + 1 <= h - 1:
-            if x - 1 >= 0:
-                if board[y + 1][x - 1] == 'M':
-                    cnt += 1
-            if x + 1 <= w - 1:
-                if board[y + 1][x + 1] == 'M':
-                    cnt += 1
-            if board[y + 1][x] == 'M':
-                cnt += 1
-        return cnt
+
+
+a = Solution()
+print(a.canPartitionKSubsets([3522,181,521,515,304,123,2512,312,922,407,146,1932,4037,2646,3871,269] ,  5 ))
+
+
