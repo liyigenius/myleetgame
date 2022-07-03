@@ -10,30 +10,74 @@ class Solution:
         :return:
         """
         pass
-        cnt = self.getcnt(s, '')
-        return cnt
+        res = self.getAns(s)
+        return res
 
     @lru_cache(None)
-    def getcnt(self, s, p):
-        if len(s) == 0:
+    def getAns(self, ss):
+        if len(ss) == 0:
+            return 0
+        if len(ss) == 1:
             return 1
-        if len(s) == 1:
-            return 1
-        if s[0] == s[-1]:
-            if s[0] != 0:
-                return self.getcnt(s[1:-1], s[0]) + 1
-            return self.getcnt(s[1:-1], s[0])
-        else:
-            cnt = math.inf
-            for i in range(1, len(s)):
-                left = s[:i]
-                right = s[i:]
-                v1 = self.getcnt(left, )
-                v2 = self.getcnt(right, '')
-                ans = v1+v2
-                cnt = min(cnt, ans)
-            return cnt
+        t1, ok = self.getOverDub(ss)
+        ans = math.inf
+        if ok:
 
+                v1 = 1 + self.getAns(t1)
+                ans = min(ans, v1)
+        else:
+            for i in range(1, len(ss)):
+                l,r = ss[:i], ss[i:]
+                cnt = self.getAns(l) + self.getAns(r)
+                ans = min(ans, cnt)
+        return ans
+
+
+    @lru_cache(None)
+    def getLmin(self, s):
+        tag = s[0]
+        l = -1
+        for (k,v) in enumerate(s):
+            if v != tag:
+                l = k-1
+                break
+        return s[l+1:]
+
+    @lru_cache(None)
+    def getRmin(self, s):
+        tag = s[-1]
+        r = -1
+        for i in range(len(s) - 1, -1, -1):
+            if s[i] == tag:
+                continue
+            else:
+                r = i + 1
+                break
+        return s[:r]
+
+    @lru_cache(None)
+    def getOverDub(self, s):
+        if s[0] == s[-1]:
+            tag = s[0]
+            l,r = -1 ,-1
+            for (k,v) in enumerate(s):
+                if v == tag:
+
+                    continue
+                else:
+                    l = k-1
+                    break
+            for i in range(len(s)-1, -1,-1):
+                if s[i] == tag:
+                    continue
+                else:
+                    r = i + 1
+                    break
+            if l == -1 or r == -1:
+                return '', True
+            return s[l+1:r], True
+        return '', False
 
 a = Solution()
-print(a.strangePrinter('aaaaaabbbb'))
+print(a.strangePrinter("baacdddaaddaaaaccbddbcabdaabdbbcdcbbbacbddcabcaaa"))
+
